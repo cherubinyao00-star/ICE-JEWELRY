@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ICE JEWELRY - Nettoyer les données</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1A2930 0%, #2d4654 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            padding: 2rem;
+        }
+        .container {
+            background: rgba(255,255,255,0.1);
+            padding: 3rem;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            max-width: 600px;
+            width: 100%;
+        }
+        h1 { font-size: 2rem; margin-bottom: 1rem; text-align: center; }
+        .info-box {
+            background: rgba(255,255,255,0.05);
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin: 1.5rem 0;
+            text-align: left;
+        }
+        .info-box h3 { margin-bottom: 0.5rem; color: #3498db; }
+        .data-item { 
+            padding: 0.5rem 0;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        button {
+            padding: 1rem 2rem;
+            font-size: 1rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 0.5rem;
+            transition: all 0.3s;
+            width: 100%;
+        }
+        .btn-danger {
+            background: #e74c3c;
+            color: white;
+        }
+        .btn-danger:hover {
+            background: #c0392b;
+            transform: translateY(-2px);
+        }
+        .btn-warning {
+            background: #f39c12;
+            color: white;
+        }
+        .btn-warning:hover {
+            background: #e67e22;
+        }
+        .btn-primary {
+            background: #3498db;
+            color: white;
+        }
+        .btn-primary:hover {
+            background: #2980b9;
+        }
+        .status {
+            margin-top: 1rem;
+            padding: 1rem;
+            border-radius: 8px;
+            display: none;
+            text-align: center;
+        }
+        .status.success {
+            background: rgba(46, 204, 113, 0.2);
+            border: 1px solid #2ecc71;
+            display: block;
+        }
+        .nav-links {
+            text-align: center;
+            margin-top: 2rem;
+            font-size: 0.9rem;
+        }
+        .nav-links a {
+            color: white;
+            margin: 0 1rem;
+        }
+    </style>
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        /* Lucide Icons Styling */
+        i[data-lucide] {
+            display: inline-block;
+            width: 1em;
+            height: 1em;
+            stroke-width: 2;
+            vertical-align: middle;
+            margin: 0 0.2em;
+        }
+        button i[data-lucide], a i[data-lucide] {
+            margin-right: 0.3em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1><i data-lucide="sparkles"></i> Nettoyer les données</h1>
+        
+        <div class="info-box">
+            <h3><i data-lucide="bar-chart-2"></i> Données actuelles :</h3>
+            <div class="data-item">
+                <strong><i data-lucide="megaphone"></i> Annonces :</strong> <span id="announcementsCount">-</span>
+                <div id="announcementsList" style="margin-top:0.5rem; font-size:0.85rem; opacity:0.8;"></div>
+            </div>
+            <div class="data-item">
+                <strong><i data-lucide="gem"></i> Produits :</strong> <span id="productsCount">-</span>
+            </div>
+            <div class="data-item">
+                <strong><i data-lucide="folder"></i> Catégories :</strong> <span id="categoriesCount">-</span>
+            </div>
+            <div class="data-item">
+                <strong><i data-lucide="shopping-cart"></i> Commandes :</strong> <span id="ordersCount">-</span>
+            </div>
+        </div>
+        
+        <button class="btn-warning" onclick="clearAnnouncementsOnly()">
+            <i data-lucide="megaphone"></i> Supprimer les annonces uniquement
+        </button>
+        
+        <button class="btn-warning" onclick="clearOrdersOnly()">
+            <i data-lucide="shopping-cart"></i> Supprimer les commandes uniquement
+        </button>
+        
+        <button class="btn-danger" onclick="clearAllData()">
+            <i data-lucide="trash-2"></i> TOUT SUPPRIMER (Annonces, Produits, Commandes, etc.)
+        </button>
+        
+        <button class="btn-primary" onclick="reloadPage()">
+            <i data-lucide="refresh-cw"></i> Rafraîchir les données
+        </button>
+        
+        <div class="status" id="status"></div>
+        
+        <div class="nav-links">
+            <a href="index.html"><i data-lucide="arrow-left"></i> Site web</a> |
+            <a href="admin-dashboard.html">Dashboard Admin</a> |
+            <a href="test-storage.html">Test Storage</a>
+        </div>
+    </div>
+
+    <script>
+        function updateDataInfo() {
+            // Announcements
+            const announcements = JSON.parse(localStorage.getItem('iceJewelryAnnouncements') || '[]');
+            document.getElementById('announcementsCount').textContent = announcements.length;
+            
+            if (announcements.length > 0) {
+                const list = announcements.map((a, i) => 
+                    `${i+1}. ${a.status === 'active' ? '<i data-lucide="check-circle"></i>' : '⚪'} ${a.text.substring(0, 60)}...`
+                ).join('<br>');
+                document.getElementById('announcementsList').innerHTML = list;
+            } else {
+                document.getElementById('announcementsList').innerHTML = '';
+            }
+            
+            // Products
+            const products = JSON.parse(localStorage.getItem('iceJewelryProducts') || '[]');
+            document.getElementById('productsCount').textContent = products.length;
+            
+            // Categories
+            const categories = JSON.parse(localStorage.getItem('iceJewelryCategories') || '[]');
+            document.getElementById('categoriesCount').textContent = categories.length;
+            
+            // Orders
+            const orders = JSON.parse(localStorage.getItem('iceJewelryOrders') || '[]');
+            document.getElementById('ordersCount').textContent = orders.length;
+        }
+        
+        function showStatus(message) {
+            const status = document.getElementById('status');
+            status.textContent = message;
+            status.classList.add('success');
+            setTimeout(() => {
+                status.style.display = 'none';
+            }, 3000);
+        }
+        
+        function clearAllData() {
+            if (!confirm('<i data-lucide="alert-triangle"></i> ATTENTION !\n\nVoulez-vous vraiment TOUT supprimer ?\n\n• Toutes les annonces\n• Tous les produits\n• Toutes les catégories\n• Toutes les commandes\n\nCette action est IRRÉVERSIBLE !')) {
+                return;
+            }
+            
+            localStorage.removeItem('iceJewelryOrders');
+            localStorage.removeItem('iceJewelryProducts');
+            localStorage.removeItem('iceJewelryCategories');
+            localStorage.removeItem('iceJewelryAnnouncements');
+            
+            showStatus('<i data-lucide="check-circle"></i> TOUTES les données ont été supprimées !');
+            updateDataInfo();
+        }
+        
+        function clearOrdersOnly() {
+            if (!confirm('Supprimer toutes les commandes ?')) return;
+            localStorage.removeItem('iceJewelryOrders');
+            showStatus('<i data-lucide="check-circle"></i> Toutes les commandes ont été supprimées !');
+            updateDataInfo();
+        }
+        
+        function clearAnnouncementsOnly() {
+            if (!confirm('Supprimer toutes les annonces ?\n\nCela inclut les annonces hardcodées qui pourraient empêcher vos nouvelles annonces de fonctionner.')) return;
+            localStorage.removeItem('iceJewelryAnnouncements');
+            showStatus('<i data-lucide="check-circle"></i> Toutes les annonces ont été supprimées !\n\nVous pouvez maintenant créer de nouvelles annonces depuis le dashboard.');
+            updateDataInfo();
+        }
+        
+        function reloadPage() {
+            updateDataInfo();
+            showStatus('<i data-lucide="refresh-cw"></i> Données rafraîchies !');
+        }
+        
+        // Update on load and every 2 seconds
+        updateDataInfo();
+        setInterval(updateDataInfo, 2000);
+    </script>
+
+    <script>
+        // Initialize Lucide icons
+        document.addEventListener('DOMContentLoaded', function() {
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
+            }
+        });
+    </script>
+</body>
+</html>
